@@ -1,10 +1,12 @@
-import type { GitHubRelease, GitHubRepository, RateLimit, RepositoryReport } from './types'
+import type { GitHubRelease, GitHubRepository, GitHubTag, RateLimit, RepositoryReport } from './types'
 
 const API_ROOT = 'https://api.github.com'
 const CACHE_TTL_MS = 5 * 60 * 1000
 const CACHE_PREFIX = 'pluginpulse:report:'
+const CACHE_VERSION = 2
 
 interface CachedReport {
+  version: number
   savedAt: number
   report: Omit<RepositoryReport, 'rateLimit'> & {
     rateLimit: Omit<RateLimit, 'resetAt'> & { resetAt: string | null }
@@ -62,7 +64,7 @@ function readCachedReport(key: string): RepositoryReport | null {
     const raw = window.localStorage.getItem(`${CACHE_PREFIX}${key}`)
     if (!raw) return null
     const cached = JSON.parse(raw) as CachedReport
-    if (Date.now() - cached.savedAt > CACHE_TTL_MS) {
+    if (cached.version !== CACHE_VERSION || Date.now() - cached.savedAt > CACHE_TTL_MS) {
       window.localStorage.removeItem(`${CACHE_PREFIX}${key}`)
       return null
     }
@@ -81,6 +83,7 @@ function readCachedReport(key: string): RepositoryReport | null {
 function writeCachedReport(key: string, report: RepositoryReport): void {
   try {
     const cached: CachedReport = {
+      version: CACHE_VERSION,
       savedAt: Date.now(),
       report: {
         ...report,
@@ -112,6 +115,10 @@ export async function fetchRepositoryReport(owner: string, repo: string): Promis
   const releasesResult = await githubFetch<GitHubRelease[]>(
     `/repos/${canonicalOwnerPath}/${canonicalRepoPath}/releases?per_page=6`,
   )
+  const releases = releasesResult.data.filter((release) => !release.draft)
+  const tags = releases.length === 0
+    ? (await githubFetch<GitHubTag[]>(`/repos/${canonicalOwnerPath}/${canonicalRepoPath}/tags?per_page=6`)).data
+    : []
 
   let openIssueCount = repositoryResult.data.open_issues_count
   let issueCountApproximate = true
@@ -128,7 +135,8 @@ export async function fetchRepositoryReport(owner: string, repo: string): Promis
 
   const report: RepositoryReport = {
     repository: repositoryResult.data,
-    releases: releasesResult.data.filter((release) => !release.draft),
+    releases,
+    tags,
     openIssueCount,
     issueCountApproximate,
     rateLimit: repositoryResult.rateLimit,

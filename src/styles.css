@@ -101,6 +101,13 @@ a.release-row:hover { color: var(--blue); background: rgba(255,255,255,.48); }
 .release-row strong { font-family: 'JetBrains Mono Variable', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .release-row em { margin-left: 7px; font-family: 'Manrope Variable', sans-serif; font-style: normal; font-size: 0.62rem; color: var(--amber); }
 .release-row span:last-child { display: flex; align-items: center; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.tag-source-link { min-height: 44px; margin-top: 14px; display: inline-flex; gap: 6px; align-items: center; font-size: 0.76rem; font-weight: 700; }
+.tag-row { display: grid; grid-template-columns: minmax(130px, 1.5fr) 1fr .9fr; gap: 16px; align-items: center; min-height: 57px; border-bottom: 1px solid var(--rule); text-decoration: none; font-size: 0.78rem; }
+.tag-row.header { min-height: 39px; color: var(--muted); font-size: 0.68rem; }
+a.tag-row:hover { color: var(--blue); background: rgba(255,255,255,.48); }
+.tag-row strong { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono Variable', monospace; }
+.tag-row code { font-size: 0.72rem; }
+.tag-row span:last-child { display: flex; align-items: center; justify-content: space-between; }
 
 .repository-folio { border-left: 1px solid var(--rule); padding: 42px 0 0 32px; }
 .folio-intro p { margin: 0 0 14px; line-height: 1.65; font-size: 0.9rem; }.folio-intro a { min-height: 32px; display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 700; }
@@ -142,6 +149,7 @@ footer > span { color: var(--ink); font-weight: 740; } footer p { margin: 0; } f
   .release-row { grid-template-columns: minmax(96px, 1fr) 92px 68px; gap: 7px; font-size: 0.69rem; }
   .release-row strong { min-width: 0; }
   .release-row span:nth-child(3) { display: none; }
+  .tag-row { grid-template-columns: minmax(100px, 1fr) 76px 76px; gap: 7px; font-size: 0.69rem; }
   .release-row.header span:nth-child(3) { display: none; }
   .empty-release { grid-template-columns: auto 1fr; }.empty-release a { grid-column: 2; }
   footer { grid-template-columns: 1fr; gap: 10px; padding: 28px 0; }

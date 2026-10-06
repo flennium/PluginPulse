@@ -48,6 +48,16 @@ export interface GitHubRelease {
   assets: ReleaseAsset[]
 }
 
+export interface GitHubTag {
+  name: string
+  zipball_url: string
+  tarball_url: string
+  commit: {
+    sha: string
+    url: string
+  }
+}
+
 export interface RateLimit {
   limit: number | null
   remaining: number | null
@@ -57,6 +67,7 @@ export interface RateLimit {
 export interface RepositoryReport {
   repository: GitHubRepository
   releases: GitHubRelease[]
+  tags: GitHubTag[]
   openIssueCount: number
   issueCountApproximate: boolean
   rateLimit: RateLimit

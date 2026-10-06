@@ -19,6 +19,7 @@ Inspect releases, downloadable assets, issue pressure, and repository activity f
 PluginPulse turns an `owner/repository` identifier—or a complete GitHub repository URL—into an operational release overview.
 
 - Latest published release and downloadable assets
+- Git tag and source-archive fallback for projects that do not use GitHub Releases
 - Asset sizes and download counts
 - Recent release history
 - Exact open-issue count when GitHub Search supports the repository, with an open-items fallback when it does not

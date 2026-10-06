@@ -12,10 +12,11 @@ import {
   History,
   Search,
   Star,
+  Tag,
 } from 'lucide-react'
 import { formatBytes, formatDate, formatNumber, relativeDate } from './format'
 import { fetchRepositoryReport, GitHubApiError, parseRepositoryInput } from './github'
-import type { GitHubRelease, RepositoryReport } from './types'
+import type { GitHubRelease, GitHubTag, RepositoryReport } from './types'
 
 const EXAMPLES = ['flennium/LightStaff', 'PaperMC/Paper', 'lucko/LuckPerms']
 
@@ -198,10 +199,11 @@ function IdleLedger() {
 }
 
 function RepositoryWorkspace({ report }: { report: RepositoryReport }) {
-  const { repository, releases, openIssueCount, issueCountApproximate, rateLimit } = report
+  const { repository, releases, tags, openIssueCount, issueCountApproximate, rateLimit } = report
   const latest = releases[0]
+  const latestTag = tags[0]
   const totalDownloads = useMemo(() => releases.reduce((sum, release) => sum + releaseDownloads(release), 0), [releases])
-  const health = repository.archived ? 'Archived' : latest ? 'Publishing' : 'No releases'
+  const health = repository.archived ? 'Archived' : latest ? 'Publishing' : latestTag ? 'Tagged source' : 'No versions'
 
   return (
     <section className="workspace" aria-labelledby="repository-name">
@@ -213,7 +215,7 @@ function RepositoryWorkspace({ report }: { report: RepositoryReport }) {
             <h2 id="repository-name">{repository.name}</h2>
           </div>
         </div>
-        <div className="health-stamp" data-tone={health === 'Publishing' ? 'healthy' : 'warning'}>
+        <div className="health-stamp" data-tone={health === 'Publishing' || health === 'Tagged source' ? 'healthy' : 'warning'}>
           <CircleDot size={17} aria-hidden="true" />
           <span>Release status</span>
           <strong>{health}</strong>
@@ -229,17 +231,23 @@ function RepositoryWorkspace({ report }: { report: RepositoryReport }) {
             <div className="section-heading">
               <div>
                 <History size={20} aria-hidden="true" />
-                <h3 id="latest-release-title">Latest release</h3>
+                <h3 id="latest-release-title">{latest ? 'Latest release' : 'Latest version'}</h3>
               </div>
               {latest && <span>Published {formatDate(latest.published_at)}</span>}
             </div>
-            {latest ? <ReleaseDetail release={latest} /> : <EmptyRelease repositoryUrl={repository.html_url} />}
+            {latest
+              ? <ReleaseDetail release={latest} />
+              : latestTag
+                ? <TagDetail tag={latestTag} repositoryUrl={repository.html_url} />
+                : <EmptyRelease repositoryUrl={repository.html_url} />}
           </section>
 
           <section className="release-history" aria-labelledby="release-history-title">
             <div className="section-heading">
-              <div><Box size={20} aria-hidden="true" /><h3 id="release-history-title">Release history</h3></div>
-              <span>{releases.length} recent {releases.length === 1 ? 'release' : 'releases'}</span>
+              <div><Box size={20} aria-hidden="true" /><h3 id="release-history-title">{releases.length ? 'Release history' : 'Version history'}</h3></div>
+              <span>{releases.length
+                ? `${releases.length} recent ${releases.length === 1 ? 'release' : 'releases'}`
+                : `${tags.length} recent ${tags.length === 1 ? 'tag' : 'tags'}`}</span>
             </div>
             {releases.length > 0 ? (
               <div className="release-table" role="table" aria-label="Recent releases">
@@ -255,7 +263,9 @@ function RepositoryWorkspace({ report }: { report: RepositoryReport }) {
                   </a>
                 ))}
               </div>
-            ) : <p className="plain-empty">Published releases will appear here.</p>}
+            ) : tags.length > 0 ? (
+              <TagHistory tags={tags} repositoryUrl={repository.html_url} />
+            ) : <p className="plain-empty">Published releases and version tags will appear here.</p>}
           </section>
         </div>
 
@@ -272,7 +282,7 @@ function RepositoryWorkspace({ report }: { report: RepositoryReport }) {
               <dt><CircleDot size={16} /> {issueCountApproximate ? 'Open items' : 'Open issues'}</dt>
               <dd>{formatNumber(openIssueCount)}</dd>
             </div>
-            <div><dt><Download size={16} /> Recent downloads</dt><dd>{formatNumber(totalDownloads)}</dd></div>
+            <div><dt><Download size={16} /> Release downloads</dt><dd>{releases.length ? formatNumber(totalDownloads) : '—'}</dd></div>
           </dl>
 
           <dl className="facts">
@@ -315,6 +325,52 @@ function ReleaseDetail({ release }: { release: GitHubRelease }) {
           ))}
         </div>
       ) : <p className="plain-empty">This release has no downloadable assets.</p>}
+    </div>
+  )
+}
+
+function TagDetail({ tag, repositoryUrl }: { tag: GitHubTag; repositoryUrl: string }) {
+  return (
+    <div className="release-detail tag-detail">
+      <div className="release-title">
+        <div>
+          <span>Git version tag</span>
+          <h4>{tag.name}</h4>
+        </div>
+        <code>{tag.commit.sha.slice(0, 7)}</code>
+      </div>
+      <div className="asset-list">
+        <a href={tag.zipball_url}>
+          <Download size={18} aria-hidden="true" />
+          <span><strong>Source code (ZIP)</strong><small>Archive generated by GitHub</small></span>
+          <ArrowUpRight size={16} aria-hidden="true" />
+        </a>
+        <a href={tag.tarball_url}>
+          <Download size={18} aria-hidden="true" />
+          <span><strong>Source code (TAR.GZ)</strong><small>Archive generated by GitHub</small></span>
+          <ArrowUpRight size={16} aria-hidden="true" />
+        </a>
+      </div>
+      <a className="tag-source-link" href={`${repositoryUrl}/tree/${encodeURIComponent(tag.name)}`} target="_blank" rel="noreferrer">
+        Inspect this tag on GitHub <ArrowUpRight size={15} />
+      </a>
+    </div>
+  )
+}
+
+function TagHistory({ tags, repositoryUrl }: { tags: GitHubTag[]; repositoryUrl: string }) {
+  return (
+    <div className="release-table tag-table" role="table" aria-label="Recent version tags">
+      <div className="tag-row header" role="row">
+        <span role="columnheader">Version</span><span role="columnheader">Commit</span><span role="columnheader">Source</span>
+      </div>
+      {tags.map((tag) => (
+        <a className="tag-row" role="row" href={`${repositoryUrl}/tree/${encodeURIComponent(tag.name)}`} target="_blank" rel="noreferrer" key={tag.commit.sha}>
+          <strong role="cell"><Tag size={14} aria-hidden="true" />{tag.name}</strong>
+          <code role="cell">{tag.commit.sha.slice(0, 7)}</code>
+          <span role="cell">View tag <ArrowUpRight size={14} /></span>
+        </a>
+      ))}
     </div>
   )
 }
