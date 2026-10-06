@@ -103,7 +103,7 @@ export function App() {
     <div className="app-shell">
       <header className="topbar">
         <a className="brand" href="./" aria-label="PluginPulse home">
-          <span className="brand-mark" aria-hidden="true"><span /></span>
+          <img className="brand-mark" src={`${import.meta.env.BASE_URL}pluginpulse-mark.svg`} alt="" width="28" height="28" />
           <span>PluginPulse</span>
         </a>
         <div className="topbar-meta">

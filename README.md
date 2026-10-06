@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="public/pluginpulse-mark-512.png" width="96" height="96" alt="PluginPulse logo">
+
 # PluginPulse
 
 ### Release health for public GitHub repositories

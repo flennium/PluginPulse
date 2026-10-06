@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">PluginPulse</title>
+  <desc id="desc">Three blue pulse bars inside a dark circular outline.</desc>
+  <circle cx="256" cy="256" r="218" fill="#F5F6F2" stroke="#172019" stroke-width="32"/>
+  <rect x="144" y="250" width="38" height="108" rx="19" fill="#2F5BFF"/>
+  <rect x="237" y="154" width="38" height="204" rx="19" fill="#2F5BFF"/>
+  <rect x="330" y="202" width="38" height="156" rx="19" fill="#2F5BFF"/>
+</svg>

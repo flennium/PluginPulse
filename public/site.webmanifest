@@ -1,0 +1,23 @@
+{
+  "name": "PluginPulse",
+  "short_name": "PluginPulse",
+  "description": "Release health for public GitHub repositories.",
+  "start_url": "/PluginPulse/",
+  "display": "standalone",
+  "background_color": "#F5F6F2",
+  "theme_color": "#F5F6F2",
+  "icons": [
+    {
+      "src": "/PluginPulse/pluginpulse-mark-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/PluginPulse/pluginpulse-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
